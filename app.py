@@ -92,13 +92,13 @@ while True:
     differences = calculate_differences(prev_data, new_data)
 
     # Display metrics
-    metrics_placeholder.empty()
     with st.beta_container():
         st.header("Metrics:")
-        st.write("Light Change:", differences['Light'].iloc[-1])
-        st.write("Water Change:", differences['Water'].iloc[-1])
-        st.write("Soil Moisture Change:", differences['Moist'].iloc[-1])
-        st.write("Temperature Change:", differences['Temp'].iloc[-1])
-        st.write("Humidity Change:", differences['Humid'].iloc[-1])
+        col1, col2, col3, col4, col5 = st.columns(5)
+        col1.metric("Light Change", differences['Light'].iloc[-1])
+        col2.metric("Water Change", differences['Water'].iloc[-1])
+        col3.metric("Soil Moisture Change", differences['Moist'].iloc[-1])
+        col4.metric("Temperature Change", differences['Temp'].iloc[-1])
+        col5.metric("Humidity Change", differences['Humid'].iloc[-1])
 
     prev_data = new_data
