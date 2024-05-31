@@ -4,6 +4,8 @@ from google.oauth2.service_account import Credentials
 import pandas as pd
 import plotly.express as px
 import time
+from PIL import Image
+import webview
 
 # Add an image to the top of Streamlit app
 st.image('mqdc-idyllias-logo.png', use_column_width=True)
@@ -61,6 +63,8 @@ def fetch_data():
     # Convert all columns to numeric
     df = df.apply(pd.to_numeric, errors='coerce')
 
+    print("DataFrame columns after renaming and processing:", df.columns)
+
     return df
 
 # Function to create line chart
@@ -72,40 +76,52 @@ def create_line_chart(df, title):
                   line_dash_sequence=['solid']*5)  # Ensure solid lines for all sensors
     return fig
 
-# Function to display metrics
-def display_metrics():
-    # Fetch real-time data
-    df = fetch_data()
-
-    # Check if all required columns are present
-    required_columns = ["Light", "Water", "Soil Moisture", "Temperature", "Humidity"]
-    if all(col in df.columns for col in required_columns):
-        # Get the latest values
-        latest_data = df.iloc[-1]
-        previous_data = df.iloc[-2]
-
-        # Display metrics for the latest values and their changes
-        st.write("Latest Sensor Readings:")
-        for col in required_columns:
-            st.write(f"{col}: {latest_data[col]} (Δ{latest_data[col] - previous_data[col]})")
-
-# Display metrics
-display_metrics()
-
-# Create placeholders for line charts
+# Create placeholders for metrics and line charts
+metric_placeholder = st.empty()  # Placeholder for metrics
 realtime_placeholder = st.empty()
 hourly_placeholder = st.empty()
 
-# Fetch real-time data
-df = fetch_data()
+# Continuous loop to update metrics and line charts
+while True:
+    # Fetch real-time data
+    df = fetch_data()
 
-# Create real-time line chart
-fig_realtime = create_line_chart(df.tail(2000), 'Real-Time Sensor Readings')
-realtime_placeholder.plotly_chart(fig_realtime, use_container_width=True)
+    if not df.empty:
+        # Check if all required columns are present
+        required_columns = ["Light", "Water", "Soil Moisture", "Temperature", "Humidity"]
+        if all(col in df.columns for col in required_columns):
+            # Get the latest values
+            latest_data = df.iloc[-1]
+            previous_data = df.iloc[-2]
 
-# Resample data to hourly intervals and calculate the mean value
-df_hourly_avg = df.resample('H').mean()
+            # Display metrics for the latest values and their changes
+            with metric_placeholder.container():
+                st.metric(label="Light", value=latest_data["Light"], delta=latest_data["Light"] - previous_data["Light"])
+                st.metric(label="Water", value=latest_data["Water"], delta=latest_data["Water"] - previous_data["Water"])
+                st.metric(label="Soil Moisture", value=latest_data["Soil Moisture"], delta=latest_data["Soil Moisture"] - previous_data["Soil Moisture"])
+                st.metric(label="Temperature", value=latest_data["Temperature"], delta=latest_data["Temperature"] - previous_data["Temperature"])
+                st.metric(label="Humidity", value=latest_data["Humidity"], delta=latest_data["Humidity"] - previous_data["Humidity"])
 
-# Create hourly line chart
-fig_hourly = create_line_chart(df_hourly_avg, 'Average Hourly Sensor Readings')
-hourly_placeholder.plotly_chart(fig_hourly, use_container_width=True)
+        # Create real-time line chart
+        fig_realtime = create_line_chart(df.tail(2000), 'Real-Time Sensor Readings')
+        realtime_placeholder.plotly_chart(fig_realtime, use_container_width=True)
+
+        # Resample data to hourly intervals and calculate the mean value
+        df_hourly_avg = df.resample('H').mean()
+
+        # Create hourly line chart
+        fig_hourly = create_line_chart(df_hourly_avg, 'Average Hourly Sensor Readings')
+        hourly_placeholder.plotly_chart(fig_hourly, use_container_width=True)
+
+    # Pause briefly before fetching new data and updating the charts
+    time.sleep(5)  # Adjust the pause duration as needed
+
+def reload(window):
+    while True:
+        time.sleep(5)
+        window.load_url('idyllias-demo.streamlit.app/')
+        
+if __name__ == '__main__':
+    window = webview.create_window('Herbie', 'idyllias-demo.streamlit.app/')
+
+    webview.start(reload, window, http_server=True)
