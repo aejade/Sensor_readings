@@ -32,6 +32,12 @@ spreadsheet = client.open("HerbieData")
 # Select the specific sheet within the Google Sheet
 sheet = spreadsheet.worksheet("Forestias-0001")
 
+# Placeholder for metrics
+metrics_placeholder = st.empty()
+
+# Placeholder for line charts
+line_chart_placeholder = st.empty()
+
 # Function to fetch data from Google Sheet and preprocess it
 def fetch_data():
     # Fetch all records from the sheet
@@ -72,40 +78,28 @@ def create_line_chart(df, title):
                   line_dash_sequence=['solid']*5)  # Ensure solid lines for all sensors
     return fig
 
-# Placeholder for metrics
-metrics_placeholder = st.empty()
-
-# Fetch real-time data
+# Fetch initial data
 df = fetch_data()
 
-# Display metrics
-if not df.empty:
-    # Check if all required columns are present
-    required_columns = ["Light", "Water", "Soil Moisture", "Temperature", "Humidity"]
-    if all(col in df.columns for col in required_columns):
-        # Get the latest values
+# Continuous loop to update metrics and line charts
+while True:
+    # Fetch real-time data
+    df = fetch_data()
+
+    # Update metrics
+    if not df.empty:
         latest_data = df.iloc[-1]
         previous_data = df.iloc[-2]
-
-        # Display metrics for the latest values and their changes
         metrics_text = "Latest Sensor Readings:\n"
+        required_columns = ["Light", "Water", "Soil Moisture", "Temperature", "Humidity"]
         for col in required_columns:
             metrics_text += f"{col}: {latest_data[col]} (Δ{latest_data[col] - previous_data[col]})\n"
-
-        # Update metrics placeholder
         metrics_placeholder.text(metrics_text)
 
-# Create placeholders for line charts
-realtime_placeholder = st.empty()
-hourly_placeholder = st.empty()
+    # Update line chart
+    if not df.empty:
+        fig_realtime = create_line_chart(df.tail(2000), 'Real-Time Sensor Readings')
+        line_chart_placeholder.plotly_chart(fig_realtime, use_container_width=True)
 
-# Create real-time line chart
-fig_realtime = create_line_chart(df.tail(2000), 'Real-Time Sensor Readings')
-realtime_placeholder.plotly_chart(fig_realtime, use_container_width=True)
-
-# Resample data to hourly intervals and calculate the mean value
-df_hourly_avg = df.resample('H').mean()
-
-# Create hourly line chart
-fig_hourly = create_line_chart(df_hourly_avg, 'Average Hourly Sensor Readings')
-hourly_placeholder.plotly_chart(fig_hourly, use_container_width=True)
+    # Pause briefly before fetching new data and updating the charts
+    time.sleep(5)  # Adjust the pause duration as needed
