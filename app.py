@@ -10,11 +10,7 @@ st.subheader('Welcome to the sensor data dashboard')
 st.write('Here you can see the latest sensor readings from the Herbie project.')
 
 # Placeholder for metrics
-light_metric = st.metric(label="Light Change", value=0)
-water_metric = st.metric(label="Water Change", value=0)
-soil_moisture_metric = st.metric(label="Soil Moisture Change", value=0)
-temperature_metric = st.metric(label="Temperature Change", value=0)
-humidity_metric = st.metric(label="Humidity Change", value=0)
+metrics_placeholder = st.empty()
 
 # Placeholder for line chart
 line_chart_placeholder = st.empty()
@@ -96,11 +92,17 @@ while True:
     differences = calculate_differences(prev_data, new_data)
 
     # Update metrics showing differences
-    light_metric.metric(label="Light Change", value=differences['Light'].iloc[-1])
-    water_metric.metric(label="Water Change", value=differences['Water'].iloc[-1])
-    soil_moisture_metric.metric(label="Soil Moisture Change", value=differences['Moist'].iloc[-1])
-    temperature_metric.metric(label="Temperature Change", value=differences['Temp'].iloc[-1])
-    humidity_metric.metric(label="Humidity Change", value=differences['Humid'].iloc[-1])
+    light_change = differences['Light'].iloc[-1]
+    water_change = differences['Water'].iloc[-1]
+    soil_moisture_change = differences['Moist'].iloc[-1]
+    temperature_change = differences['Temp'].iloc[-1]
+    humidity_change = differences['Humid'].iloc[-1]
+
+    metrics_placeholder.metric("Light Change", light_change)
+    metrics_placeholder.metric("Water Change", water_change)
+    metrics_placeholder.metric("Soil Moisture Change", soil_moisture_change)
+    metrics_placeholder.metric("Temperature Change", temperature_change)
+    metrics_placeholder.metric("Humidity Change", humidity_change)
 
     # Update line chart
     fig_realtime = px.line(new_data.tail(2000), x=new_data.index, y=['Light', 'Water', 'Moist', 'Temp', 'Humid'],
