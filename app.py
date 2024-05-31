@@ -11,11 +11,17 @@ st.subheader('Welcome to the sensor data dashboard')
 st.write('Here you can see the latest sensor readings from the Herbie project.')
 
 # Placeholder for metrics
-light_metric = st.metric(label="Light Change", value=0)
-water_metric = st.metric(label="Water Change", value=0)
-soil_moisture_metric = st.metric(label="Soil Moisture Change", value=0)
-temperature_metric = st.metric(label="Temperature Change", value=0)
-humidity_metric = st.metric(label="Humidity Change", value=0)
+@st.cache(allow_output_mutation=True)
+def initialize_metrics():
+    return {
+        "light_metric": st.metric(label="Light Change", value=0),
+        "water_metric": st.metric(label="Water Change", value=0),
+        "soil_moisture_metric": st.metric(label="Soil Moisture Change", value=0),
+        "temperature_metric": st.metric(label="Temperature Change", value=0),
+        "humidity_metric": st.metric(label="Humidity Change", value=0)
+    }
+
+metrics = initialize_metrics()
 
 # Path to JSON key file
 SERVICE_ACCOUNT_FILE = 'herbie_key.json'
@@ -83,11 +89,11 @@ while True:
     differences = calculate_differences(prev_data, new_data)
 
     # Update metrics showing differences
-    light_metric.value = differences['Light'].iloc[-1]
-    water_metric.value = differences['Water'].iloc[-1]
-    soil_moisture_metric.value = differences['Moist'].iloc[-1]
-    temperature_metric.value = differences['Temp'].iloc[-1]
-    humidity_metric.value = differences['Humid'].iloc[-1]
+    metrics["light_metric"].value = differences['Light'].iloc[-1]
+    metrics["water_metric"].value = differences['Water'].iloc[-1]
+    metrics["soil_moisture_metric"].value = differences['Moist'].iloc[-1]
+    metrics["temperature_metric"].value = differences['Temp'].iloc[-1]
+    metrics["humidity_metric"].value = differences['Humid'].iloc[-1]
 
     # Update previous data
     prev_data = new_data
