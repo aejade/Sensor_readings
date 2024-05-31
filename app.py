@@ -76,6 +76,9 @@ def create_line_chart(df, title):
 metrics_placeholder = st.empty()
 line_chart_placeholder = st.empty()
 
+# Initialize previous data
+previous_data = None
+
 # Continuous loop to update line chart
 while True:
     # Fetch real-time data
@@ -88,13 +91,22 @@ while True:
     # Display metrics for the latest values
     if not df.empty:
         latest_data = df.iloc[-1]
-        previous_data = df.iloc[-2] if len(df) > 1 else None
         with metrics_placeholder.container():
-            st.metric(label="Light", value=latest_data["Light"], delta=latest_data["Light"] - previous_data["Light"] if previous_data is not None else None)
-            st.metric(label="Water", value=latest_data["Water"], delta=latest_data["Water"] - previous_data["Water"] if previous_data is not None else None)
-            st.metric(label="Soil Moisture", value=latest_data["Soil Moisture"], delta=latest_data["Soil Moisture"] - previous_data["Soil Moisture"] if previous_data is not None else None)
-            st.metric(label="Temperature", value=latest_data["Temperature"], delta=latest_data["Temperature"] - previous_data["Temperature"] if previous_data is not None else None)
-            st.metric(label="Humidity", value=latest_data["Humidity"], delta=latest_data["Humidity"] - previous_data["Humidity"] if previous_data is not None else None)
+            if previous_data is not None:
+                st.metric(label="Light", value=latest_data["Light"], delta=latest_data["Light"] - previous_data["Light"])
+                st.metric(label="Water", value=latest_data["Water"], delta=latest_data["Water"] - previous_data["Water"])
+                st.metric(label="Soil Moisture", value=latest_data["Soil Moisture"], delta=latest_data["Soil Moisture"] - previous_data["Soil Moisture"])
+                st.metric(label="Temperature", value=latest_data["Temperature"], delta=latest_data["Temperature"] - previous_data["Temperature"])
+                st.metric(label="Humidity", value=latest_data["Humidity"], delta=latest_data["Humidity"] - previous_data["Humidity"])
+            else:
+                st.metric(label="Light", value=latest_data["Light"])
+                st.metric(label="Water", value=latest_data["Water"])
+                st.metric(label="Soil Moisture", value=latest_data["Soil Moisture"])
+                st.metric(label="Temperature", value=latest_data["Temperature"])
+                st.metric(label="Humidity", value=latest_data["Humidity"])
+
+    # Update previous data
+    previous_data = latest_data if not df.empty else None
 
     # Pause briefly before fetching new data and updating the chart
     time.sleep(5)  # Adjust the pause duration as needed
