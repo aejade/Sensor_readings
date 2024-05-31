@@ -36,9 +36,6 @@ spreadsheet = client.open("HerbieData")
 # Select the specific sheet within the Google Sheet
 sheet = spreadsheet.worksheet("Forestias-0001")
 
-# Placeholder for line chart
-line_chart_placeholder = st.empty()
-
 # Function to fetch data from Google Sheet and preprocess it
 def fetch_data():
     # Fetch all records from the sheet
@@ -74,7 +71,13 @@ def calculate_differences(prev_data, new_data):
     differences = new_data - prev_data
     return differences
 
-# Continuous loop to update metrics and line charts
+# Fetch initial data
+prev_data = fetch_data()
+
+# Create a placeholder for the line chart
+line_chart_placeholder = st.empty()
+
+# Continuous loop to update line chart and metrics
 while True:
     # Fetch real-time data
     new_data = fetch_data()
@@ -99,7 +102,7 @@ while True:
                            color_discrete_map={'Light': 'blue', 'Water': 'green', 'Moist': 'red', 'Temp': 'orange', 'Humid': 'purple'},
                            line_dash_sequence=['solid']*5)  # Ensure solid lines for all sensors
 
-    # Update line chart
+    # Update the line chart
     line_chart_placeholder.plotly_chart(fig_realtime, use_container_width=True)
 
     # Pause briefly before fetching new data and updating the metrics
