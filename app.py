@@ -72,12 +72,8 @@ def create_line_chart(df, title):
                   line_dash_sequence=['solid']*5)  # Ensure solid lines for all sensors
     return fig
 
-# Create placeholders for metrics and line charts
-metrics_placeholder = st.empty()
+# Placeholder for line chart
 line_chart_placeholder = st.empty()
-
-# Initialize previous data
-previous_data = None
 
 # Continuous loop to update line chart
 while True:
@@ -91,22 +87,13 @@ while True:
     # Display metrics for the latest values
     if not df.empty:
         latest_data = df.iloc[-1]
-        with metrics_placeholder.container():
-            if previous_data is not None:
-                st.metric(label="Light", value=latest_data["Light"], delta=latest_data["Light"] - previous_data["Light"])
-                st.metric(label="Water", value=latest_data["Water"], delta=latest_data["Water"] - previous_data["Water"])
-                st.metric(label="Soil Moisture", value=latest_data["Soil Moisture"], delta=latest_data["Soil Moisture"] - previous_data["Soil Moisture"])
-                st.metric(label="Temperature", value=latest_data["Temperature"], delta=latest_data["Temperature"] - previous_data["Temperature"])
-                st.metric(label="Humidity", value=latest_data["Humidity"], delta=latest_data["Humidity"] - previous_data["Humidity"])
-            else:
-                st.metric(label="Light", value=latest_data["Light"])
-                st.metric(label="Water", value=latest_data["Water"])
-                st.metric(label="Soil Moisture", value=latest_data["Soil Moisture"])
-                st.metric(label="Temperature", value=latest_data["Temperature"])
-                st.metric(label="Humidity", value=latest_data["Humidity"])
-
-    # Update previous data
-    previous_data = latest_data if not df.empty else None
+        with st.sidebar:
+            st.markdown("**Latest Metrics:**")
+            st.metric(label="Light", value=latest_data["Light"])
+            st.metric(label="Water", value=latest_data["Water"])
+            st.metric(label="Soil Moisture", value=latest_data["Soil Moisture"])
+            st.metric(label="Temperature", value=latest_data["Temperature"])
+            st.metric(label="Humidity", value=latest_data["Humidity"])
 
     # Pause briefly before fetching new data and updating the chart
     time.sleep(5)  # Adjust the pause duration as needed
