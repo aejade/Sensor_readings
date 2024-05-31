@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "tesseract2",
+  "private_key_id": "7a1e4029fa54981b66860c16d7e96eb5cda8e4fb",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCvb00+U+TunCBP\neJo3/BxbVAnV8Egz4SIoiMybQJ0qokg+HeVxuu5j0+Mvp9hzWYUdedQj5H3OX/P1\nA9CuJolBg1Gjw8WeCKD47PzMUc02RuuZxc0i17J6OD8PxA1DvSoWr8eKZHbs5cOV\nxtoCdTZasdtkHsHIeihQdrZshBda+L2FHu38Bb216kxrqlqokrohyaSLMboYQQ5O\nSj2A9I3z3W7G38dfvf3Sst+D6t1p2GpLM+Y0COyBLvyPZa9yA7v4s1wpu8JuG93V\nQEPNLibBto/BSt7VGotXyhEA3THJn7uwIEYtOirm+FcGesiPLWCBJQhI7B++B0V7\n1ByCpdr7AgMBAAECggEACNdydxox3iB8H0cAePgvEsok/Bccjx92aRYDeILy3irP\nurd8rOMvpRtYMR4q1ciIRTbA6bH0fzY7kCp7x6h3NPupJLh9/LEKFS4Idn0/0HpO\n4OLWj3cJ0ha9f1Uxbiu2ZZkWOD6dZ/9oqziacWgL4b1F/oFExQ6Iz/BztKYMRp5s\ncJTmWQ00WAsMAzacxTpRpSHCoamYHv8O3HhwSK7IKLGejTsTNAZSclt1/hMiSoY5\n+zdSdxbNmeH3zpetmB2PmvTG078DqXPW6VDdarEFKnkzyveTxteoSrpCIu+t0v1l\nClLDAunNvrilbov+4uYOurbzHiTXiVIvWI/T8bsv4QKBgQDnO6LyFAQj/e+TgS9+\nEyhB1u9TU5Gf7Ixhm2NLsuX9XJktBfHHG2MMTLoc0WZ5c7O+aiTsp7UFGedapikX\nNV9pLaP62NvOahWeW/1+vf+0OMZgyffCIQYTBik1hitTmWhIvjBAHd+YHIODPY08\nONGDt+ZLqeGhfywZm4F9C/114QKBgQDCObCQlb3qR89ZSGL/3sKm8TgtyjLfmmj5\ngFlQ4zK74VUvmTtwhxCgHVUBSi3dYFE7owVltPamE6l8sLfjjyTtsort9nnEkkMH\nKWUKL79pu+44ibgHQe9ggeXtH26h3dPMjB4sqFlUYzIjYdHSv1MIs+DMgu9flnBM\nYlKBlIN0WwKBgQCPZXpdaXBP6bBi5yBOrQ6wFdyA7jhG1ukPts9TKHRcNMqBE0im\n0yMPg51/NZS5CLmVAjo30KD/stq4aobc76pljXo9m7JkRYF2nVGNAcLLPtI3P8i3\nyMb9kTqJCNVhmKcFRXyipmP87uHXx5oImKvFZYwZrBZSko0ErF0W8RKTwQKBgAHT\nWP2C6s4Q7roAHC4bgejfy49inyfK48G0myJPgGKTs6FG53AfVOCsZeglMlkqVpkg\n5yQVl1voQ2eQoanZ5pb1Xqjt8CcQ2OBwWyrFWB8+TPbrFHe8/usBTY/1A60x0JPT\nnVT+IBjS9d2vRbGdasJiLnK9qFJVr6iIJA5jvviRAoGBANhJ7tMBOaJbn4wzS3MU\nwv6C7hdHzuzAN2QjIGPvH2X6+JaImMfokB0jxM+UJjItoi2ZRfGqJNVWttdgapEA\nVT62bvOvysLUTKdYat3oahlcMraYGty74Tr1em/W10lwyBep1sn0hiiei46fIwL8\n0dHpn3KUTYfjfBe0bqbh+1gh\n-----END PRIVATE KEY-----\n",
+  "client_email": "arduino-to-gsheets@tesseract2.iam.gserviceaccount.com",
+  "client_id": "105584398341880993683",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/arduino-to-gsheets%40tesseract2.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
