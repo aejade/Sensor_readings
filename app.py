@@ -85,6 +85,9 @@ while True:
     df = fetch_data()
 
     if not df.empty:
+        # Clear the placeholder for metrics
+        metrics_placeholder.empty()
+
         # Check if all required columns are present
         required_columns = ["Light", "Water", "Soil Moisture", "Temperature", "Humidity"]
         if all(col in df.columns for col in required_columns):
