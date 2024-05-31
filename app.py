@@ -9,9 +9,6 @@ st.title('Herbie Sensor Readings')
 st.subheader('Welcome to the sensor data dashboard')
 st.write('Here you can see the latest sensor readings from the Herbie project.')
 
-# Placeholder for metrics
-metrics_placeholder = st.empty()
-
 # Placeholder for line chart
 line_chart_placeholder = st.empty()
 
@@ -83,6 +80,13 @@ fig_realtime = px.line(prev_data.tail(2000), x=prev_data.index, y=['Light', 'Wat
 # Display line chart
 line_chart_placeholder.plotly_chart(fig_realtime, use_container_width=True)
 
+# Create metrics placeholders
+light_metric = st.empty()
+water_metric = st.empty()
+soil_moisture_metric = st.empty()
+temperature_metric = st.empty()
+humidity_metric = st.empty()
+
 # Update metrics and line chart
 while True:
     # Fetch real-time data
@@ -92,18 +96,11 @@ while True:
     differences = calculate_differences(prev_data, new_data)
 
     # Update metrics showing differences
-    light_change = differences['Light'].iloc[-1]
-    water_change = differences['Water'].iloc[-1]
-    soil_moisture_change = differences['Moist'].iloc[-1]
-    temperature_change = differences['Temp'].iloc[-1]
-    humidity_change = differences['Humid'].iloc[-1]
-
-    # Update metrics
-    metrics_placeholder.write(f"Light Change: {light_change}")
-    metrics_placeholder.write(f"Water Change: {water_change}")
-    metrics_placeholder.write(f"Soil Moisture Change: {soil_moisture_change}")
-    metrics_placeholder.write(f"Temperature Change: {temperature_change}")
-    metrics_placeholder.write(f"Humidity Change: {humidity_change}")
+    light_metric.metric(label="Light Change", value=differences['Light'].iloc[-1])
+    water_metric.metric(label="Water Change", value=differences['Water'].iloc[-1])
+    soil_moisture_metric.metric(label="Soil Moisture Change", value=differences['Moist'].iloc[-1])
+    temperature_metric.metric(label="Temperature Change", value=differences['Temp'].iloc[-1])
+    humidity_metric.metric(label="Humidity Change", value=differences['Humid'].iloc[-1])
 
     # Update line chart
     fig_realtime = px.line(new_data.tail(2000), x=new_data.index, y=['Light', 'Water', 'Moist', 'Temp', 'Humid'],
