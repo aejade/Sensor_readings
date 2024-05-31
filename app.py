@@ -64,12 +64,14 @@ def calculate_differences(prev_data, new_data):
     differences = new_data - prev_data
     return differences
 
+# Placeholder for line chart
+line_chart_placeholder = st.empty()
+
+# Placeholder for metrics
+metrics_placeholder = st.empty()
+
 # Fetch initial data
 prev_data = fetch_data()
-
-# Create placeholders for line chart and metrics
-line_chart_placeholder = st.empty()
-metrics_placeholder = st.empty()
 
 # Create real-time line chart
 fig_realtime = px.line(prev_data.tail(2000), x=prev_data.index, y=['Light', 'Water', 'Moist', 'Temp', 'Humid'],
@@ -81,9 +83,27 @@ fig_realtime = px.line(prev_data.tail(2000), x=prev_data.index, y=['Light', 'Wat
 # Display line chart
 line_chart_placeholder.plotly_chart(fig_realtime, use_container_width=True)
 
-# Update metrics showing differences
-metrics_placeholder.metric("Light Change", value=0)
-metrics_placeholder.metric("Water Change", value=0)
-metrics_placeholder.metric("Soil Moisture Change", value=0)
-metrics_placeholder.metric("Temperature Change", value=0)
-metrics_placeholder.metric("Humidity Change", value=0)
+# Update metrics and line chart
+while True:
+    # Fetch real-time data
+    new_data = fetch_data()
+
+    # Calculate differences
+    differences = calculate_differences(prev_data, new_data)
+
+    # Update metrics showing differences
+    metrics_placeholder.metric("Light Change", value=differences['Light'].iloc[-1])
+    metrics_placeholder.metric("Water Change", value=differences['Water'].iloc[-1])
+    metrics_placeholder.metric("Soil Moisture Change", value=differences['Moist'].iloc[-1])
+    metrics_placeholder.metric("Temperature Change", value=differences['Temp'].iloc[-1])
+    metrics_placeholder.metric("Humidity Change", value=differences['Humid'].iloc[-1])
+
+    # Update line chart
+    fig_realtime = px.line(new_data.tail(2000), x=new_data.index, y=['Light', 'Water', 'Moist', 'Temp', 'Humid'],
+                           labels={'value': 'Value', 'index': 'Time'},
+                           title='Real-Time Sensor Readings',
+                           color_discrete_map={'Light': 'blue', 'Water': 'green', 'Moist': 'red', 'Temp': 'orange', 'Humid': 'purple'},
+                           line_dash_sequence=['solid']*5)  # Ensure solid lines for all sensors
+    line_chart_placeholder.plotly_chart(fig_realtime, use_container_width=True)
+
+    prev_data = new_data
