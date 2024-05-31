@@ -1,99 +1,57 @@
 import streamlit as st
-import gspread
-from google.oauth2.service_account import Credentials
+import numpy as np
 import pandas as pd
-import plotly.express as px
 import time
+import plotly.express as px
 
-# Add an image to the top of Streamlit app
-st.image('mqdc-idyllias-logo.png', use_column_width=True)
+# Read csv from a github repo
+df = pd.read_csv("https://raw.githubusercontent.com/Lexie88rus/bank-marketing-analysis/master/bank.csv")
 
-# Add a title to Streamlit app
-st.title('Herbie Sensor Readings')
-st.subheader('Welcome to the sensor data dashboard')
-st.write('Here you can see the latest sensor readings from the Herbie project.')
+st.set_page_config(
+    page_title='Real-Time Data Science Dashboard',
+    page_icon='✅',
+    layout='wide'
+)
 
-# Path to JSON key file
-SERVICE_ACCOUNT_FILE = 'herbie_key.json'
+# Dashboard title
+st.title("Real-Time / Live Data Science Dashboard")
 
-# Define the scope
-SCOPES = [
-    "https://www.googleapis.com/auth/spreadsheets",
-    "https://www.googleapis.com/auth/drive"
-]
+# Top-level filters
+job_filter = st.selectbox("Select the Job", pd.unique(df['job']))
 
-# Authenticate with the JSON key file
-creds = Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes=SCOPES)
-client = gspread.authorize(creds)
+# Creating a single-element container
+placeholder = st.empty()
 
-# Open the Google Sheet by name
-spreadsheet = client.open("HerbieData")
+# Dataframe filter
+df_filtered = df[df['job'] == job_filter]
 
-# Select the specific sheet within the Google Sheet
-sheet = spreadsheet.worksheet("Forestias-0001")
+# Near real-time / live feed simulation
+for seconds in range(200):
+    df_filtered['age_new'] = df_filtered['age'] * np.random.choice(range(1, 5))
+    df_filtered['balance_new'] = df_filtered['balance'] * np.random.choice(range(1, 5)))
 
-# Function to fetch data from Google Sheet and preprocess it
-def fetch_data():
-    # Fetch all records from the sheet
-    data = sheet.get_all_records()
-
-    # Convert the records to a pandas DataFrame
-    df = pd.DataFrame(data)
-
-    # Rename columns to match desired names
-    df.rename(columns={'TimeString': 'Time', 'Temp': 'Temperature', 'Moist': 'Soil Moisture', 'Humid': 'Humidity'}, inplace=True)
-
-    # Ensure 'Time' is datetime and set as index
-    df['Time'] = pd.to_datetime(df['Time'])
-    df.set_index('Time', inplace=True)
-
-    # Drop unwanted columns
-    unwanted_columns = ['Herbie_ID']
-    df.drop(columns=unwanted_columns, inplace=True, errors='ignore')
-
-    # Select data starting from index 17302 (if exists)
-    if len(df) > 17302:
-        df = df.iloc[17302:]
-
-    # Fill NaN values with 0
-    df = df.fillna(0)
-
-    # Convert all columns to numeric
-    df = df.apply(pd.to_numeric, errors='coerce')
-
-    return df
-
-# Function to create line chart
-def create_line_chart(df, title):
-    fig = px.line(df, x=df.index, y=['Light', 'Water', 'Soil Moisture', 'Temperature', 'Humidity'],
-                  labels={'value': 'Value', 'index': 'Time'},
-                  title=title,
-                  color_discrete_map={'Light': 'blue', 'Water': 'green', 'Soil Moisture': 'red', 'Temperature': 'orange', 'Humidity': 'purple'},
-                  line_dash_sequence=['solid']*5)  # Ensure solid lines for all sensors
-    return fig
-
-# Placeholder for line chart
-line_chart_placeholder = st.empty()
-
-# Continuous loop to update line chart
-while True:
-    # Fetch real-time data
-    df = fetch_data()
-
-    # Update line chart
-    fig = create_line_chart(df.tail(2000), 'Real-Time Sensor Readings')
-    line_chart_placeholder.plotly_chart(fig, use_container_width=True)
+    # Creating KPIs
+    avg_age = np.mean(df_filtered['age_new'])
+    count_married = int(df_filtered[df_filtered["marital"] == 'married']['marital'].count() + np.random.choice(range(1, 30)))
+    balance = np.mean(df_filtered['balance_new'])
 
     # Display metrics for the latest values
-    if not df.empty:
-        latest_data = df.iloc[-1]
-        with st.sidebar:
-            st.markdown("**Latest Metrics:**")
-            st.metric(label="Light", value=latest_data["Light"])
-            st.metric(label="Water", value=latest_data["Water"])
-            st.metric(label="Soil Moisture", value=latest_data["Soil Moisture"])
-            st.metric(label="Temperature", value=latest_data["Temperature"])
-            st.metric(label="Humidity", value=latest_data["Humidity"])
+    with placeholder.container():
+        st.markdown("**Latest Metrics:**")
+        st.metric(label="Age ⏳", value=round(avg_age), delta=round(avg_age) - 10)
+        st.metric(label="Married Count 💍", value=int(count_married), delta=-10 + count_married)
+        st.metric(label="A/C Balance ＄", value=f"$ {round(balance, 2)} ", delta=-round(balance / count_married) * 100)
 
-    # Pause briefly before fetching new data and updating the chart
-    time.sleep(5)  # Adjust the pause duration as needed
+        # Create two columns for charts
+        fig_col1, fig_col2 = st.columns(2)
+        with fig_col1:
+            st.markdown("### First Chart")
+            fig = px.density_heatmap(data_frame=df_filtered, y='age_new', x='marital')
+            st.plotly_chart(fig)
+        with fig_col2:
+            st.markdown("### Second Chart")
+            fig2 = px.histogram(data_frame=df_filtered, x='age_new')
+            st.plotly_chart(fig2)
+        st.markdown("### Detailed Data View")
+        st.dataframe(df_filtered)
+        time.sleep(1)
