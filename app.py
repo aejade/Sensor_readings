@@ -3,6 +3,7 @@ import gspread
 from google.oauth2.service_account import Credentials
 import pandas as pd
 import plotly.express as px
+import time
 
 # Add a title and description
 st.title('Herbie Sensor Readings')
@@ -11,9 +12,6 @@ st.write('Here you can see the latest sensor readings from the Herbie project.')
 
 # Placeholder for metrics
 metrics_placeholder = st.empty()
-
-# Placeholder for line chart
-line_chart_placeholder = st.empty()
 
 # Path to JSON key file
 SERVICE_ACCOUNT_FILE = 'herbie_key.json'
@@ -69,25 +67,11 @@ def calculate_differences(prev_data, new_data):
     differences = new_data - prev_data
     return differences
 
+# Placeholder for line chart
+line_chart_placeholder = st.empty()
+
 # Fetch initial data
 prev_data = fetch_data()
-
-# Create real-time line chart
-fig_realtime = px.line(prev_data.tail(2000), x=prev_data.index, y=['Light', 'Water', 'Moist', 'Temp', 'Humid'],
-                       labels={'value': 'Value', 'index': 'Time'},
-                       title='Real-Time Sensor Readings',
-                       color_discrete_map={'Light': 'blue', 'Water': 'green', 'Moist': 'red', 'Temp': 'orange', 'Humid': 'purple'},
-                       line_dash_sequence=['solid']*5)  # Ensure solid lines for all sensors
-
-# Display line chart
-line_chart_placeholder.plotly_chart(fig_realtime, use_container_width=True)
-
-# Display metrics once
-light_metric = st.metric(label="Light Change", value=0)
-water_metric = st.metric(label="Water Change", value=0)
-soil_moisture_metric = st.metric(label="Soil Moisture Change", value=0)
-temperature_metric = st.metric(label="Temperature Change", value=0)
-humidity_metric = st.metric(label="Humidity Change", value=0)
 
 # Continuous loop to update metrics and line chart
 while True:
@@ -97,31 +81,26 @@ while True:
     # Calculate differences
     differences = calculate_differences(prev_data, new_data)
 
-    # Update metrics showing differences
-    light_metric.value = differences['Light'].iloc[-1]
-    water_metric.value = differences['Water'].iloc[-1]
-    soil_moisture_metric.value = differences['Moist'].iloc[-1]
-    temperature_metric.value = differences['Temp'].iloc[-1]
-    humidity_metric.value = differences['Humid'].iloc[-1]
-
     # Update previous data
     prev_data = new_data
 
-    # Pause briefly before fetching new data and updating the metrics and line chart
-    time.sleep(5)  # Adjust the pause duration as needed
-
-    # Update line chart
+    # Create real-time line chart
     fig_realtime = px.line(new_data.tail(2000), x=new_data.index, y=['Light', 'Water', 'Moist', 'Temp', 'Humid'],
                            labels={'value': 'Value', 'index': 'Time'},
                            title='Real-Time Sensor Readings',
                            color_discrete_map={'Light': 'blue', 'Water': 'green', 'Moist': 'red', 'Temp': 'orange', 'Humid': 'purple'},
                            line_dash_sequence=['solid']*5)  # Ensure solid lines for all sensors
+
+    # Update line chart
     line_chart_placeholder.plotly_chart(fig_realtime, use_container_width=True)
 
-    # Rerun the script to update metrics and line chart
+    # Update metrics showing differences
     metrics_placeholder.empty()
-    light_metric = metrics_placeholder.metric(label="Light Change", value=differences['Light'].iloc[-1])
-    water_metric = metrics_placeholder.metric(label="Water Change", value=differences['Water'].iloc[-1])
-    soil_moisture_metric = metrics_placeholder.metric(label="Soil Moisture Change", value=differences['Moist'].iloc[-1])
-    temperature_metric = metrics_placeholder.metric(label="Temperature Change", value=differences['Temp'].iloc[-1])
-    humidity_metric = metrics_placeholder.metric(label="Humidity Change", value=differences['Humid'].iloc[-1])
+    metrics_placeholder.metric(label="Light Change", value=differences['Light'].iloc[-1])
+    metrics_placeholder.metric(label="Water Change", value=differences['Water'].iloc[-1])
+    metrics_placeholder.metric(label="Soil Moisture Change", value=differences['Moist'].iloc[-1])
+    metrics_placeholder.metric(label="Temperature Change", value=differences['Temp'].iloc[-1])
+    metrics_placeholder.metric(label="Humidity Change", value=differences['Humid'].iloc[-1])
+
+    # Pause briefly before fetching new data and updating the metrics and line chart
+    time.sleep(5)  # Adjust the pause duration as needed
