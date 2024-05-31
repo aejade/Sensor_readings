@@ -75,7 +75,7 @@ def create_line_chart(df, title):
     return fig
 
 # Create placeholders for metrics and line charts
-metrics_placeholder = st.empty()  # Placeholder for metrics
+metric_placeholder = st.empty()  # Placeholder for metrics
 realtime_placeholder = st.empty()
 hourly_placeholder = st.empty()
 
@@ -93,14 +93,12 @@ while True:
             previous_data = df.iloc[-2]
 
             # Display metrics for the latest values and their changes
-            metrics_data = []
-            for col in required_columns:
-                metrics_data.append((col, latest_data[col], latest_data[col] - previous_data[col]))
-
-            # Display metrics
-            metrics_placeholder.write("Latest Sensor Readings:")
-            for metric in metrics_data:
-                st.write(f"{metric[0]}: {metric[1]} (Δ{metric[2]})")
+            with metric_placeholder.container():
+                st.metric(label="Light", value=latest_data["Light"], delta=latest_data["Light"] - previous_data["Light"])
+                st.metric(label="Water", value=latest_data["Water"], delta=latest_data["Water"] - previous_data["Water"])
+                st.metric(label="Soil Moisture", value=latest_data["Soil Moisture"], delta=latest_data["Soil Moisture"] - previous_data["Soil Moisture"])
+                st.metric(label="Temperature", value=latest_data["Temperature"], delta=latest_data["Temperature"] - previous_data["Temperature"])
+                st.metric(label="Humidity", value=latest_data["Humidity"], delta=latest_data["Humidity"] - previous_data["Humidity"])
 
         # Create real-time line chart
         fig_realtime = create_line_chart(df.tail(2000), 'Real-Time Sensor Readings')
@@ -125,4 +123,5 @@ if __name__ == '__main__':
     window = webview.create_window('Herbie', 'idyllias-demo.streamlit.app/')
 
     webview.start(reload, window, http_server=True)
+
     
