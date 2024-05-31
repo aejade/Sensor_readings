@@ -39,6 +39,7 @@ spreadsheet = client.open("HerbieData")
 sheet = spreadsheet.worksheet("Forestias-0001")
 
 # Function to fetch data from Google Sheet and preprocess it
+@st.cache
 def fetch_data():
     # Fetch all records from the sheet
     data = sheet.get_all_records()
