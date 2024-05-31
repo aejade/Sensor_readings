@@ -92,17 +92,18 @@ while True:
     differences = calculate_differences(prev_data, new_data)
 
     # Display metrics
-    metrics_html = f"""
-        <div>
-            <h2>Metrics:</h2>
-            <p>Light Change: {differences['Light'].iloc[-1]}</p>
-            <p>Water Change: {differences['Water'].iloc[-1]}</p>
-            <p>Soil Moisture Change: {differences['Moist'].iloc[-1]}</p>
-            <p>Temperature Change: {differences['Temp'].iloc[-1]}</p>
-            <p>Humidity Change: {differences['Humid'].iloc[-1]}</p>
-        </div>
-    """
-    metrics_placeholder.write(metrics_html, unsafe_allow_html=True)
+    metrics_html = """
+        <h2>Metrics:</h2>
+        <ul>
+            <li>Light Change: {}</li>
+            <li>Water Change: {}</li>
+            <li>Soil Moisture Change: {}</li>
+            <li>Temperature Change: {}</li>
+            <li>Humidity Change: {}</li>
+        </ul>
+    """.format(differences['Light'].iloc[-1], differences['Water'].iloc[-1], differences['Moist'].iloc[-1], 
+               differences['Temp'].iloc[-1], differences['Humid'].iloc[-1])
+    metrics_placeholder.markdown(metrics_html, unsafe_allow_html=True)
 
     # Update line chart
     fig_realtime = px.line(new_data.tail(2000), x=new_data.index, y=['Light', 'Water', 'Moist', 'Temp', 'Humid'],
