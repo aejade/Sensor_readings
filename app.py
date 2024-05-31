@@ -65,7 +65,10 @@ def calculate_differences(prev_data, new_data):
     return differences
 
 # Placeholder for line chart
-line_chart_placeholder, metrics_placeholder = st.beta_columns([3, 1])
+line_chart_placeholder = st.empty()
+
+# Placeholder for metrics
+metrics_placeholder = st.empty()
 
 # Fetch initial data
 prev_data = fetch_data()
@@ -89,17 +92,11 @@ while True:
     differences = calculate_differences(prev_data, new_data)
 
     # Display metrics
-    metrics_html = """
-        <h2>Metrics:</h2>
-        <ul>
-            <li>Light Change: {}</li>
-            <li>Water Change: {}</li>
-            <li>Soil Moisture Change: {}</li>
-            <li>Temperature Change: {}</li>
-            <li>Humidity Change: {}</li>
-        </ul>
-    """.format(differences['Light'].iloc[-1], differences['Water'].iloc[-1], differences['Moist'].iloc[-1], 
-               differences['Temp'].iloc[-1], differences['Humid'].iloc[-1])
-    metrics_placeholder.markdown(metrics_html, unsafe_allow_html=True)
+    st.header("Metrics:")
+    st.metric("Light Change", differences['Light'].iloc[-1])
+    st.metric("Water Change", differences['Water'].iloc[-1])
+    st.metric("Soil Moisture Change", differences['Moist'].iloc[-1])
+    st.metric("Temperature Change", differences['Temp'].iloc[-1])
+    st.metric("Humidity Change", differences['Humid'].iloc[-1])
 
     prev_data = new_data
