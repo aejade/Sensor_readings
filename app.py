@@ -3,7 +3,6 @@ import gspread
 from google.oauth2.service_account import Credentials
 import pandas as pd
 import plotly.express as px
-import time
 
 # Add a title and description
 st.title('Herbie Sensor Readings')
@@ -71,13 +70,20 @@ def calculate_differences(prev_data, new_data):
     differences = new_data - prev_data
     return differences
 
-# Placeholder for line chart
-line_chart_placeholder = st.empty()
-
 # Fetch initial data
 prev_data = fetch_data()
 
-# Continuous loop to update metrics and line charts
+# Create real-time line chart
+fig_realtime = px.line(prev_data.tail(2000), x=prev_data.index, y=['Light', 'Water', 'Moist', 'Temp', 'Humid'],
+                       labels={'value': 'Value', 'index': 'Time'},
+                       title='Real-Time Sensor Readings',
+                       color_discrete_map={'Light': 'blue', 'Water': 'green', 'Moist': 'red', 'Temp': 'orange', 'Humid': 'purple'},
+                       line_dash_sequence=['solid']*5)  # Ensure solid lines for all sensors
+
+# Display line chart
+st.plotly_chart(fig_realtime, use_container_width=True)
+
+# Display metrics once
 while True:
     # Fetch real-time data
     new_data = fetch_data()
@@ -95,15 +101,5 @@ while True:
     # Update previous data
     prev_data = new_data
 
-    # Create real-time line chart
-    fig_realtime = px.line(new_data.tail(2000), x=new_data.index, y=['Light', 'Water', 'Moist', 'Temp', 'Humid'],
-                           labels={'value': 'Value', 'index': 'Time'},
-                           title='Real-Time Sensor Readings',
-                           color_discrete_map={'Light': 'blue', 'Water': 'green', 'Moist': 'red', 'Temp': 'orange', 'Humid': 'purple'},
-                           line_dash_sequence=['solid']*5)  # Ensure solid lines for all sensors
-
-    # Update line chart
-    line_chart_placeholder.plotly_chart(fig_realtime, use_container_width=True)
-
-    # Pause briefly before fetching new data and updating the metrics
-    time.sleep(5)  # Adjust the pause duration as needed
+    # Rerun the script to update metrics and line chart
+    st.experimental_rerun()
