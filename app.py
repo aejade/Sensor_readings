@@ -36,6 +36,9 @@ soil_moisture_metric = st.metric(label="Soil Moisture Change", value=0)
 temperature_metric = st.metric(label="Temperature Change", value=0)
 humidity_metric = st.metric(label="Humidity Change", value=0)
 
+# Placeholder for line chart
+line_chart_placeholder = st.empty()
+
 # Function to fetch data from Google Sheet and preprocess it
 def fetch_data():
     # Fetch all records from the sheet
@@ -98,7 +101,9 @@ while True:
                            title='Real-Time Sensor Readings',
                            color_discrete_map={'Light': 'blue', 'Water': 'green', 'Moist': 'red', 'Temp': 'orange', 'Humid': 'purple'},
                            line_dash_sequence=['solid']*5)  # Ensure solid lines for all sensors
-    st.plotly_chart(fig_realtime, use_container_width=True)
+
+    # Update line chart
+    line_chart_placeholder.plotly_chart(fig_realtime, use_container_width=True)
 
     # Pause briefly before fetching new data and updating the metrics
     time.sleep(5)  # Adjust the pause duration as needed
