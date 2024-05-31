@@ -67,12 +67,8 @@ def calculate_differences(prev_data, new_data):
 # Placeholder for line chart
 line_chart_placeholder = st.empty()
 
-# Create placeholders for metrics
-light_metric_placeholder = st.empty()
-water_metric_placeholder = st.empty()
-moist_metric_placeholder = st.empty()
-temp_metric_placeholder = st.empty()
-humid_metric_placeholder = st.empty()
+# Placeholder for metrics
+metrics_placeholder = st.empty()
 
 # Fetch initial data
 prev_data = fetch_data()
@@ -95,12 +91,12 @@ while True:
     # Calculate differences
     differences = calculate_differences(prev_data, new_data)
 
-    # Update metrics showing differences
-    light_metric_placeholder.metric("Light Change", value=differences['Light'].iloc[-1])
-    water_metric_placeholder.metric("Water Change", value=differences['Water'].iloc[-1])
-    moist_metric_placeholder.metric("Soil Moisture Change", value=differences['Moist'].iloc[-1])
-    temp_metric_placeholder.metric("Temperature Change", value=differences['Temp'].iloc[-1])
-    humid_metric_placeholder.metric("Humidity Change", value=differences['Humid'].iloc[-1])
+    # Display metrics
+    metrics_placeholder.write("Light Change:", differences['Light'].iloc[-1])
+    metrics_placeholder.write("Water Change:", differences['Water'].iloc[-1])
+    metrics_placeholder.write("Soil Moisture Change:", differences['Moist'].iloc[-1])
+    metrics_placeholder.write("Temperature Change:", differences['Temp'].iloc[-1])
+    metrics_placeholder.write("Humidity Change:", differences['Humid'].iloc[-1])
 
     # Update line chart
     fig_realtime = px.line(new_data.tail(2000), x=new_data.index, y=['Light', 'Water', 'Moist', 'Temp', 'Humid'],
