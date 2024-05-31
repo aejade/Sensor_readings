@@ -10,6 +10,13 @@ st.title('Herbie Sensor Readings')
 st.subheader('Welcome to the sensor data dashboard')
 st.write('Here you can see the latest sensor readings from the Herbie project.')
 
+# Placeholder for metrics
+light_metric = st.metric(label="Light Change", value=0)
+water_metric = st.metric(label="Water Change", value=0)
+soil_moisture_metric = st.metric(label="Soil Moisture Change", value=0)
+temperature_metric = st.metric(label="Temperature Change", value=0)
+humidity_metric = st.metric(label="Humidity Change", value=0)
+
 # Path to JSON key file
 SERVICE_ACCOUNT_FILE = 'herbie_key.json'
 
@@ -28,13 +35,6 @@ spreadsheet = client.open("HerbieData")
 
 # Select the specific sheet within the Google Sheet
 sheet = spreadsheet.worksheet("Forestias-0001")
-
-# Placeholder for metrics
-light_metric = st.metric(label="Light Change", value=0)
-water_metric = st.metric(label="Water Change", value=0)
-soil_moisture_metric = st.metric(label="Soil Moisture Change", value=0)
-temperature_metric = st.metric(label="Temperature Change", value=0)
-humidity_metric = st.metric(label="Humidity Change", value=0)
 
 # Placeholder for line chart
 line_chart_placeholder = st.empty()
@@ -73,9 +73,6 @@ def fetch_data():
 def calculate_differences(prev_data, new_data):
     differences = new_data - prev_data
     return differences
-
-# Fetch initial data
-prev_data = fetch_data()
 
 # Continuous loop to update metrics and line charts
 while True:
