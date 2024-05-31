@@ -4,10 +4,6 @@ from google.oauth2.service_account import Credentials
 import pandas as pd
 import plotly.express as px
 import time
-from PIL import Image
-import io
-import webview
-import time
 
 # Add an image to the top of Streamlit app
 st.image('mqdc-idyllias-logo.png', use_column_width=True)
@@ -17,24 +13,8 @@ st.title('Herbie Sensor Readings')
 st.subheader('Welcome to the sensor data dashboard')
 st.write('Here you can see the latest sensor readings from the Herbie project.')
 
-# Path to JSON key file
-SERVICE_ACCOUNT_FILE = 'herbie_key.json'
-
-# Define the scope
-SCOPES = [
-    "https://www.googleapis.com/auth/spreadsheets",
-    "https://www.googleapis.com/auth/drive"
-]
-
-# Authenticate with the JSON key file
-creds = Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes=SCOPES)
-client = gspread.authorize(creds)
-
-# Open the Google Sheet by name
-spreadsheet = client.open("HerbieData")
-
-# Select the specific sheet within the Google Sheet
-sheet = spreadsheet.worksheet("Forestias-0001")
+# Placeholder for metrics
+metric_columns = st.columns(5)
 
 # Function to fetch data from Google Sheet and preprocess it
 def fetch_data():
@@ -79,37 +59,56 @@ def create_line_chart(df, title):
                   line_dash_sequence=['solid']*5)  # Ensure solid lines for all sensors
     return fig
 
-# Create placeholders for line charts
-realtime_placeholder = st.empty()
-hourly_placeholder = st.empty()
+# Path to JSON key file
+SERVICE_ACCOUNT_FILE = 'herbie_key.json'
+
+# Define the scope
+SCOPES = [
+    "https://www.googleapis.com/auth/spreadsheets",
+    "https://www.googleapis.com/auth/drive"
+]
+
+# Authenticate with the JSON key file
+creds = Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes=SCOPES)
+client = gspread.authorize(creds)
+
+# Open the Google Sheet by name
+spreadsheet = client.open("HerbieData")
+
+# Select the specific sheet within the Google Sheet
+sheet = spreadsheet.worksheet("Forestias-0001")
+
+# Placeholder for previous data
+prev_data = fetch_data()
+
+# Update metrics values
+for i, col in enumerate(prev_data.columns):
+    metric_columns[i].metric(col, value=prev_data[col].iloc[-1])
 
 # Continuous loop to update line charts
 while True:
     # Fetch real-time data
     df = fetch_data()
-
+    
+    # Calculate differences between previous and current data
+    differences = df.tail(1) - prev_data.tail(1)
+    
+    # Update metrics values
+    for i, col in enumerate(differences.columns):
+        metric_columns[i].metric(col, value=differences[col].iloc[0])
     
     # Create real-time line chart
     fig_realtime = create_line_chart(df.tail(2000), 'Real-Time Sensor Readings')
-    realtime_placeholder.plotly_chart(fig_realtime, use_container_width=True)
+    st.plotly_chart(fig_realtime, use_container_width=True)
 
     # Resample data to hourly intervals and calculate the mean value
     df_hourly_avg = df.resample('H').mean()
 
     # Create hourly line chart
     fig_hourly = create_line_chart(df_hourly_avg, 'Average Hourly Sensor Readings')
-    hourly_placeholder.plotly_chart(fig_hourly, use_container_width=True)
+    st.plotly_chart(fig_hourly, use_container_width=True)
 
+    prev_data = df
+    
     # Pause briefly before fetching new data and updating the charts
     time.sleep(5)  # Adjust the pause duration as needed
-
-
-def reload(window):
-    while True:
-        time.sleep(5)
-        window.load_url('idyllias-demo.streamlit.app/')
-        
-if __name__ == '__main__':
-    window = webview.create_window('Herbie', 'idyllias-demo.streamlit.app/')
-
-    webview.start(reload, window, http_server=True)
