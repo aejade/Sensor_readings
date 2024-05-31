@@ -9,6 +9,9 @@ st.title('Herbie Sensor Readings')
 st.subheader('Welcome to the sensor data dashboard')
 st.write('Here you can see the latest sensor readings from the Herbie project.')
 
+# Placeholder for metrics
+metrics_placeholder = st.empty()
+
 # Placeholder for line chart
 line_chart_placeholder = st.empty()
 
@@ -81,11 +84,8 @@ fig_realtime = px.line(prev_data.tail(2000), x=prev_data.index, y=['Light', 'Wat
 line_chart_placeholder.plotly_chart(fig_realtime, use_container_width=True)
 
 # Create metrics placeholders
-light_metric = st.empty()
-water_metric = st.empty()
-soil_moisture_metric = st.empty()
-temperature_metric = st.empty()
-humidity_metric = st.empty()
+metrics_labels = ["Light Change", "Water Change", "Soil Moisture Change", "Temperature Change", "Humidity Change"]
+metrics_values = [0] * len(metrics_labels)
 
 # Update metrics and line chart
 while True:
@@ -96,11 +96,9 @@ while True:
     differences = calculate_differences(prev_data, new_data)
 
     # Update metrics showing differences
-    light_metric.metric(label="Light Change", value=differences['Light'].iloc[-1])
-    water_metric.metric(label="Water Change", value=differences['Water'].iloc[-1])
-    soil_moisture_metric.metric(label="Soil Moisture Change", value=differences['Moist'].iloc[-1])
-    temperature_metric.metric(label="Temperature Change", value=differences['Temp'].iloc[-1])
-    humidity_metric.metric(label="Humidity Change", value=differences['Humid'].iloc[-1])
+    for i, label in enumerate(metrics_labels):
+        metrics_values[i] = differences.iloc[-1][label.split()[0]]  # Extract sensor name from label
+        metrics_placeholder.metric(label=label, value=metrics_values[i])
 
     # Update line chart
     fig_realtime = px.line(new_data.tail(2000), x=new_data.index, y=['Light', 'Water', 'Moist', 'Temp', 'Humid'],
