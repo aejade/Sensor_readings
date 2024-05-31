@@ -85,7 +85,7 @@ while True:
     df = fetch_data()
 
     if not df.empty:
-        # Clear the placeholder for metrics
+        # Clear the placeholder for metrics only once per iteration
         metrics_placeholder.empty()
 
         # Check if all required columns are present
