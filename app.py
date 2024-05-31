@@ -10,13 +10,6 @@ st.title('Herbie Sensor Readings')
 st.subheader('Welcome to the sensor data dashboard')
 st.write('Here you can see the latest sensor readings from the Herbie project.')
 
-# Placeholder for metrics
-light_metric = st.metric(label="Light Change", value=0)
-water_metric = st.metric(label="Water Change", value=0)
-soil_moisture_metric = st.metric(label="Soil Moisture Change", value=0)
-temperature_metric = st.metric(label="Temperature Change", value=0)
-humidity_metric = st.metric(label="Humidity Change", value=0)
-
 # Path to JSON key file
 SERVICE_ACCOUNT_FILE = 'herbie_key.json'
 
@@ -77,6 +70,13 @@ line_chart_placeholder = st.empty()
 # Fetch initial data
 prev_data = fetch_data()
 
+# Placeholder for metrics
+light_metric = st.metric(label="Light", value=prev_data['Light'].iloc[-1])
+water_metric = st.metric(label="Water", value=prev_data['Water'].iloc[-1])
+soil_moisture_metric = st.metric(label="Soil Moisture", value=prev_data['Moist'].iloc[-1])
+temperature_metric = st.metric(label="Temperature", value=prev_data['Temp'].iloc[-1])
+humidity_metric = st.metric(label="Humidity", value=prev_data['Humid'].iloc[-1])
+
 # Continuous loop to update metrics and line charts
 while True:
     # Fetch real-time data
@@ -86,11 +86,20 @@ while True:
     differences = calculate_differences(prev_data, new_data)
 
     # Update metrics showing differences
-    light_metric.value = differences['Light'].iloc[-1]
-    water_metric.value = differences['Water'].iloc[-1]
-    soil_moisture_metric.value = differences['Moist'].iloc[-1]
-    temperature_metric.value = differences['Temp'].iloc[-1]
-    humidity_metric.value = differences['Humid'].iloc[-1]
+    light_metric.value = new_data['Light'].iloc[-1]
+    light_metric.delta = differences['Light'].iloc[-1]
+
+    water_metric.value = new_data['Water'].iloc[-1]
+    water_metric.delta = differences['Water'].iloc[-1]
+
+    soil_moisture_metric.value = new_data['Moist'].iloc[-1]
+    soil_moisture_metric.delta = differences['Moist'].iloc[-1]
+
+    temperature_metric.value = new_data['Temp'].iloc[-1]
+    temperature_metric.delta = differences['Temp'].iloc[-1]
+
+    humidity_metric.value = new_data['Humid'].iloc[-1]
+    humidity_metric.delta = differences['Humid'].iloc[-1]
 
     # Update previous data
     prev_data = new_data
