@@ -123,5 +123,3 @@ if __name__ == '__main__':
     window = webview.create_window('Herbie', 'idyllias-demo.streamlit.app/')
 
     webview.start(reload, window, http_server=True)
-
-    
