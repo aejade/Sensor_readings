@@ -4,16 +4,14 @@ from google.oauth2.service_account import Credentials
 import pandas as pd
 import plotly.express as px
 import time
-from PIL import Image
-import webview
 
-# Add an image to the top of Streamlit app
-st.image('mqdc-idyllias-logo.png', use_column_width=True)
-
-# Add a title to Streamlit app
+# Add a title and description
 st.title('Herbie Sensor Readings')
 st.subheader('Welcome to the sensor data dashboard')
 st.write('Here you can see the latest sensor readings from the Herbie project.')
+
+# Placeholder for metrics
+metrics_placeholder = st.empty()
 
 # Path to JSON key file
 SERVICE_ACCOUNT_FILE = 'herbie_key.json'
@@ -42,10 +40,9 @@ def fetch_data():
     # Convert the records to a pandas DataFrame
     df = pd.DataFrame(data)
 
-    # Rename columns to match desired names
-    df.rename(columns={'TimeString': 'Time', 'Temp': 'Temperature', 'Moist': 'Soil Moisture', 'Humid': 'Humidity'}, inplace=True)
+    df.rename(columns={'TimeString': 'Time'}, inplace=True)
 
-    # Ensure 'Time' is datetime and set as index
+    # Ensure 'TimeString' is datetime and set as index
     df['Time'] = pd.to_datetime(df['Time'])
     df.set_index('Time', inplace=True)
 
@@ -65,8 +62,12 @@ def fetch_data():
 
     return df
 
+
 # Function to create line chart
 def create_line_chart(df, title):
+    
+    df.rename(columns={'Temp': 'Temperature', 'Moist': 'Soil Moisture', 'Humid': 'Humidity'}, inplace=True)
+    
     fig = px.line(df, x=df.index, y=['Light', 'Water', 'Soil Moisture', 'Temperature', 'Humidity'],
                   labels={'value': 'Value', 'index': 'Time'},
                   title=title,
@@ -74,43 +75,29 @@ def create_line_chart(df, title):
                   line_dash_sequence=['solid']*5)  # Ensure solid lines for all sensors
     return fig
 
-# Create placeholders for metrics and line charts
-metric_placeholder = st.empty()  # Placeholder for metrics
-realtime_placeholder = st.empty()
-hourly_placeholder = st.empty()
-
-# Continuous loop to update metrics and line charts
+# Continuous loop to update line charts
 while True:
     # Fetch real-time data
     df = fetch_data()
 
-    if not df.empty:
-        # Check if all required columns are present
-        required_columns = ["Light", "Water", "Soil Moisture", "Temperature", "Humidity"]
-        if all(col in df.columns for col in required_columns):
-            # Get the latest values
-            latest_data = df.iloc[-1]
-            previous_data = df.iloc[-2]
+    # Calculate differences for each sensor
+    differences = df.diff().tail(1).dropna()
+    light_change = differences['Light'].values[0]
+    water_change = differences['Water'].values[0]
+    soil_moisture_change = differences['Moist'].values[0]
+    temperature_change = differences['Temp'].values[0]
+    humidity_change = differences['Humid'].values[0]
 
-            # Display metrics for the latest values
-            with metric_placeholder.container():
-                st.markdown("**Latest Metrics:**")
-                st.metric(label="Light", value=latest_data["Light"], delta=latest_data["Light"] - previous_data["Light"])
-                st.metric(label="Water", value=latest_data["Water"], delta=latest_data["Water"] - previous_data["Water"])
-                st.metric(label="Soil Moisture", value=latest_data["Soil Moisture"], delta=latest_data["Soil Moisture"] - previous_data["Soil Moisture"])
-                st.metric(label="Temperature", value=latest_data["Temperature"], delta=latest_data["Temperature"] - previous_data["Temperature"])
-                st.metric(label="Humidity", value=latest_data["Humidity"], delta=latest_data["Humidity"] - previous_data["Humidity"])
+    # Display metrics showing changes for each sensor
+    metrics_placeholder.metric("Light Change", value=light_change)
+    metrics_placeholder.metric("Water Change", value=water_change)
+    metrics_placeholder.metric("Soil Moisture Change", value=soil_moisture_change)
+    metrics_placeholder.metric("Temperature Change", value=temperature_change)
+    metrics_placeholder.metric("Humidity Change", value=humidity_change)
 
-        # Create real-time line chart
-        fig_realtime = create_line_chart(df.tail(2000), 'Real-Time Sensor Readings')
-        realtime_placeholder.plotly_chart(fig_realtime, use_container_width=True)
-
-        # Resample data to hourly intervals and calculate the mean value
-        df_hourly_avg = df.resample('H').mean()
-
-        # Create hourly line chart
-        fig_hourly = create_line_chart(df_hourly_avg, 'Average Hourly Sensor Readings')
-        hourly_placeholder.plotly_chart(fig_hourly, use_container_width=True)
+    # Create real-time line chart
+    fig_realtime = create_line_chart(df.tail(2000), 'Real-Time Sensor Readings')
+    st.plotly_chart(fig_realtime, use_container_width=True)
 
     # Pause briefly before fetching new data and updating the charts
     time.sleep(5)  # Adjust the pause duration as needed
