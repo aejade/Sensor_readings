@@ -67,9 +67,6 @@ def calculate_differences(prev_data, new_data):
 # Placeholder for line chart
 line_chart_placeholder = st.empty()
 
-# Placeholder for metrics
-metrics_placeholder = st.empty()
-
 # Fetch initial data
 prev_data = fetch_data()
 
@@ -91,12 +88,12 @@ while True:
     # Calculate differences
     differences = calculate_differences(prev_data, new_data)
 
-    # Update metrics showing differences
-    metrics_placeholder.metric("Light Change", value=differences['Light'].iloc[-1])
-    metrics_placeholder.metric("Water Change", value=differences['Water'].iloc[-1])
-    metrics_placeholder.metric("Soil Moisture Change", value=differences['Moist'].iloc[-1])
-    metrics_placeholder.metric("Temperature Change", value=differences['Temp'].iloc[-1])
-    metrics_placeholder.metric("Humidity Change", value=differences['Humid'].iloc[-1])
+    # Display metrics
+    st.metric("Light Change", value=differences['Light'].iloc[-1])
+    st.metric("Water Change", value=differences['Water'].iloc[-1])
+    st.metric("Soil Moisture Change", value=differences['Moist'].iloc[-1])
+    st.metric("Temperature Change", value=differences['Temp'].iloc[-1])
+    st.metric("Humidity Change", value=differences['Humid'].iloc[-1])
 
     # Update line chart
     fig_realtime = px.line(new_data.tail(2000), x=new_data.index, y=['Light', 'Water', 'Moist', 'Temp', 'Humid'],
