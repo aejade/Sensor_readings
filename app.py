@@ -98,5 +98,13 @@ while True:
     # Update previous data
     prev_data = new_data
 
+    # Create real-time line chart
+    fig_realtime = px.line(new_data.tail(2000), x=new_data.index, y=['Light', 'Water', 'Moist', 'Temp', 'Humid'],
+                           labels={'value': 'Value', 'index': 'Time'},
+                           title='Real-Time Sensor Readings',
+                           color_discrete_map={'Light': 'blue', 'Water': 'green', 'Moist': 'red', 'Temp': 'orange', 'Humid': 'purple'},
+                           line_dash_sequence=['solid']*5)  # Ensure solid lines for all sensors
+    st.plotly_chart(fig_realtime, use_container_width=True)
+
     # Pause briefly before fetching new data and updating the metrics
     time.sleep(5)  # Adjust the pause duration as needed
