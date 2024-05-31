@@ -32,12 +32,6 @@ spreadsheet = client.open("HerbieData")
 # Select the specific sheet within the Google Sheet
 sheet = spreadsheet.worksheet("Forestias-0001")
 
-# Placeholder for metrics
-metrics_placeholder = st.empty()
-
-# Placeholder for line charts
-line_chart_placeholder = st.empty()
-
 # Function to fetch data from Google Sheet and preprocess it
 def fetch_data():
     # Fetch all records from the sheet
@@ -80,6 +74,12 @@ def create_line_chart(df, title):
 
 # Fetch initial data
 df = fetch_data()
+
+# Placeholder for metrics
+metrics_placeholder = st.empty()
+
+# Placeholder for line chart
+line_chart_placeholder = st.empty()
 
 # Continuous loop to update metrics and line charts
 while True:
