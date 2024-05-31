@@ -11,11 +11,11 @@ st.subheader('Welcome to the sensor data dashboard')
 st.write('Here you can see the latest sensor readings from the Herbie project.')
 
 # Placeholder for metrics
-light_metric = st.empty()
-water_metric = st.empty()
-soil_moisture_metric = st.empty()
-temperature_metric = st.empty()
-humidity_metric = st.empty()
+light_metric = st.metric(label="Light Change", value=0)
+water_metric = st.metric(label="Water Change", value=0)
+soil_moisture_metric = st.metric(label="Soil Moisture Change", value=0)
+temperature_metric = st.metric(label="Temperature Change", value=0)
+humidity_metric = st.metric(label="Humidity Change", value=0)
 
 # Placeholder for line chart
 line_chart_placeholder = st.empty()
@@ -74,34 +74,36 @@ def calculate_differences(prev_data, new_data):
     differences = new_data - prev_data
     return differences
 
-# Initial fetch and display
+# Fetch initial data
 prev_data = fetch_data()
+
+# Create real-time line chart
 fig_realtime = px.line(prev_data.tail(2000), x=prev_data.index, y=['Light', 'Water', 'Moist', 'Temp', 'Humid'],
                        labels={'value': 'Value', 'index': 'Time'},
                        title='Real-Time Sensor Readings',
                        color_discrete_map={'Light': 'blue', 'Water': 'green', 'Moist': 'red', 'Temp': 'orange', 'Humid': 'purple'},
                        line_dash_sequence=['solid']*5)  # Ensure solid lines for all sensors
+
+# Display line chart
 line_chart_placeholder.plotly_chart(fig_realtime, use_container_width=True)
 
 # Update metrics and line chart
 while True:
+    # Fetch real-time data
     new_data = fetch_data()
+
+    # Calculate differences
     differences = calculate_differences(prev_data, new_data)
 
-    light_metric.metric(label="Light Change", value=differences['Light'].iloc[-1])
-    water_metric.metric(label="Water Change", value=differences['Water'].iloc[-1])
-    soil_moisture_metric.metric(label="Soil Moisture Change", value=differences['Moist'].iloc[-1])
-    temperature_metric.metric(label="Temperature Change", value=differences['Temp'].iloc[-1])
-    humidity_metric.metric(label="Humidity Change", value=differences['Humid'].iloc[-1])
+    # Update metrics showing differences
+    light_metric.value = differences['Light'].iloc[-1]
+    water_metric.value = differences['Water'].iloc[-1]
+    soil_moisture_metric.value = differences['Moist'].iloc[-1]
+    temperature_metric.value = differences['Temp'].iloc[-1]
+    humidity_metric.value = differences['Humid'].iloc[-1]
 
-    fig_realtime = px.line(new_data.tail(2000), x=new_data.index, y=['Light', 'Water', 'Moist', 'Temp', 'Humid'],
-                           labels={'value': 'Value', 'index': 'Time'},
-                           title='Real-Time Sensor Readings',
-                           color_discrete_map={'Light': 'blue', 'Water': 'green', 'Moist': 'red', 'Temp': 'orange', 'Humid': 'purple'},
-                           line_dash_sequence=['solid']*5)  # Ensure solid lines for all sensors
-    line_chart_placeholder.plotly_chart(fig_realtime, use_container_width=True)
-
+    # Update previous data
     prev_data = new_data
 
-    # Pause briefly before fetching new data and updating the metrics
+    # Pause briefly before fetching new data and updating the metrics and line chart
     time.sleep(5)  # Adjust the pause duration as needed
