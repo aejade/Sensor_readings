@@ -10,11 +10,11 @@ st.subheader('Welcome to the sensor data dashboard')
 st.write('Here you can see the latest sensor readings from the Herbie project.')
 
 # Placeholder for metrics
-light_metric = st.empty()
-water_metric = st.empty()
-soil_moisture_metric = st.empty()
-temperature_metric = st.empty()
-humidity_metric = st.empty()
+light_metric = st.metric(label="Light Change", value=0)
+water_metric = st.metric(label="Water Change", value=0)
+soil_moisture_metric = st.metric(label="Soil Moisture Change", value=0)
+temperature_metric = st.metric(label="Temperature Change", value=0)
+humidity_metric = st.metric(label="Humidity Change", value=0)
 
 # Placeholder for line chart
 line_chart_placeholder = st.empty()
@@ -39,7 +39,6 @@ spreadsheet = client.open("HerbieData")
 sheet = spreadsheet.worksheet("Forestias-0001")
 
 # Function to fetch data from Google Sheet and preprocess it
-@st.cache
 def fetch_data():
     # Fetch all records from the sheet
     data = sheet.get_all_records()
@@ -88,7 +87,7 @@ fig_realtime = px.line(prev_data.tail(2000), x=prev_data.index, y=['Light', 'Wat
 line_chart_placeholder.plotly_chart(fig_realtime, use_container_width=True)
 
 # Update metrics and line chart
-def update_metrics_and_chart():
+while True:
     # Fetch real-time data
     new_data = fetch_data()
 
@@ -110,8 +109,4 @@ def update_metrics_and_chart():
                            line_dash_sequence=['solid']*5)  # Ensure solid lines for all sensors
     line_chart_placeholder.plotly_chart(fig_realtime, use_container_width=True)
 
-    # Update previous data
     prev_data = new_data
-
-# Execute the update function
-update_metrics_and_chart()
