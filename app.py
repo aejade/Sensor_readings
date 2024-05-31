@@ -75,6 +75,24 @@ def create_line_chart(df, title):
                   line_dash_sequence=['solid']*5)  # Ensure solid lines for all sensors
     return fig
 
+# Fetch initial data
+df = fetch_data()
+
+# Calculate initial differences for each sensor
+differences = df.diff().tail(1).dropna()
+light_change = differences['Light'].values[0]
+water_change = differences['Water'].values[0]
+soil_moisture_change = differences['Moist'].values[0]
+temperature_change = differences['Temp'].values[0]
+humidity_change = differences['Humid'].values[0]
+
+# Display initial metrics showing changes for each sensor
+metrics_placeholder.metric("Light Change", value=light_change)
+metrics_placeholder.metric("Water Change", value=water_change)
+metrics_placeholder.metric("Soil Moisture Change", value=soil_moisture_change)
+metrics_placeholder.metric("Temperature Change", value=temperature_change)
+metrics_placeholder.metric("Humidity Change", value=humidity_change)
+
 # Continuous loop to update line charts
 while True:
     # Fetch real-time data
@@ -88,7 +106,7 @@ while True:
     temperature_change = differences['Temp'].values[0]
     humidity_change = differences['Humid'].values[0]
 
-    # Display metrics showing changes for each sensor
+    # Update metrics showing changes for each sensor
     metrics_placeholder.metric("Light Change", value=light_change)
     metrics_placeholder.metric("Water Change", value=water_change)
     metrics_placeholder.metric("Soil Moisture Change", value=soil_moisture_change)
