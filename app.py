@@ -13,8 +13,24 @@ st.title('Herbie Sensor Readings')
 st.subheader('Welcome to the sensor data dashboard')
 st.write('Here you can see the latest sensor readings from the Herbie project.')
 
-# Placeholder for metrics
-metric_columns = st.columns(5)
+# Path to JSON key file
+SERVICE_ACCOUNT_FILE = 'herbie_key.json'
+
+# Define the scope
+SCOPES = [
+    "https://www.googleapis.com/auth/spreadsheets",
+    "https://www.googleapis.com/auth/drive"
+]
+
+# Authenticate with the JSON key file
+creds = Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes=SCOPES)
+client = gspread.authorize(creds)
+
+# Open the Google Sheet by name
+spreadsheet = client.open("HerbieData")
+
+# Select the specific sheet within the Google Sheet
+sheet = spreadsheet.worksheet("Forestias-0001")
 
 # Function to fetch data from Google Sheet and preprocess it
 def fetch_data():
@@ -56,64 +72,40 @@ def create_line_chart(df, title):
                   line_dash_sequence=['solid']*5)  # Ensure solid lines for all sensors
     return fig
 
-# Path to JSON key file
-SERVICE_ACCOUNT_FILE = 'herbie_key.json'
+# Create placeholders for metrics
+metric_columns = st.columns(5)
 
-# Define the scope
-SCOPES = [
-    "https://www.googleapis.com/auth/spreadsheets",
-    "https://www.googleapis.com/auth/drive"
-]
+# Placeholder for line charts
+realtime_placeholder = st.empty()
+hourly_placeholder = st.empty()
 
-# Authenticate with the JSON key file
-creds = Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes=SCOPES)
-client = gspread.authorize(creds)
-
-# Open the Google Sheet by name
-spreadsheet = client.open("HerbieData")
-
-# Select the specific sheet within the Google Sheet
-sheet = spreadsheet.worksheet("Forestias-0001")
-
-# Placeholder for previous data
-prev_data = fetch_data()
-
-# Update metrics values and deltas
-num_columns = min(len(prev_data.columns), len(metric_columns))
-for i in range(num_columns):
-    col = prev_data.columns[i]
-    delta_value = 0
-    if not prev_data.empty and col in prev_data.columns and col in prev_data.columns:
-        delta_value = prev_data[col].iloc[-1] - prev_data[col].iloc[-2]
-    metric_columns[i].metric(col, value=prev_data[col].iloc[-1], delta=delta_value)
-
-# Continuous loop to update line charts
+# Continuous loop to update metrics and line charts
 while True:
     # Fetch real-time data
     df = fetch_data()
-    
-    # Calculate differences between previous and current data
-    differences = df.tail(1) - prev_data.tail(1)
-    
-    # Update metrics values and deltas
-    num_columns = min(len(differences.columns), len(metric_columns))
-    for i in range(num_columns):
-        col = differences.columns[i]
-        delta_value = differences[col].iloc[-1] if not differences.empty else 0
-        metric_columns[i].metric(col, value=df[col].iloc[-1], delta=delta_value)
-    
-    # Create real-time line chart
-    fig_realtime = create_line_chart(df.tail(2000), 'Real-Time Sensor Readings')
-    st.plotly_chart(fig_realtime, use_container_width=True)
 
-    # Resample data to hourly intervals and calculate the mean value
-    df_hourly_avg = df.resample('H').mean()
+    if not df.empty:
+        # Calculate differences between previous and current data
+        differences = df.diff().iloc[-1]
 
-    # Create hourly line chart
-    fig_hourly = create_line_chart(df_hourly_avg, 'Average Hourly Sensor Readings')
-    st.plotly_chart(fig_hourly, use_container_width=True)
+        # Update metrics values and deltas
+        metrics = ['Light', 'Water', 'Soil Moisture', 'Temperature', 'Humidity']
+        for i, col in enumerate(metrics):
+            if col in df.columns:
+                current_value = df[col].iloc[-1]
+                delta_value = differences[col] if not differences.empty else 0
+                metric_columns[i].metric(col, value=current_value, delta=delta_value)
 
-    prev_data = df
-    
+        # Create real-time line chart
+        fig_realtime = create_line_chart(df.tail(2000), 'Real-Time Sensor Readings')
+        realtime_placeholder.plotly_chart(fig_realtime, use_container_width=True)
+
+        # Resample data to hourly intervals and calculate the mean value
+        df_hourly_avg = df.resample('H').mean()
+
+        # Create hourly line chart
+        fig_hourly = create_line_chart(df_hourly_avg, 'Average Hourly Sensor Readings')
+        hourly_placeholder.plotly_chart(fig_hourly, use_container_width=True)
+
     # Pause briefly before fetching new data and updating the charts
     time.sleep(5)  # Adjust the pause duration as needed
