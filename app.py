@@ -78,11 +78,14 @@ sheet = spreadsheet.worksheet("Forestias-0001")
 # Placeholder for previous data
 prev_data = fetch_data()
 
-# Update metrics values
+# Update metrics values and deltas
 num_columns = min(len(prev_data.columns), len(metric_columns))
 for i in range(num_columns):
     col = prev_data.columns[i]
-    metric_columns[i].metric(col, value=prev_data[col].iloc[-1])
+    delta_value = 0
+    if not prev_data.empty and col in prev_data.columns and col in prev_data.columns:
+        delta_value = prev_data[col].iloc[-1] - prev_data[col].iloc[-2]
+    metric_columns[i].metric(col, value=prev_data[col].iloc[-1], delta=delta_value)
 
 # Continuous loop to update line charts
 while True:
@@ -96,7 +99,8 @@ while True:
     num_columns = min(len(differences.columns), len(metric_columns))
     for i in range(num_columns):
         col = differences.columns[i]
-        metric_columns[i].metric(col, value=df[col].iloc[-1], delta=differences[col].iloc[-1])
+        delta_value = differences[col].iloc[-1] if not differences.empty else 0
+        metric_columns[i].metric(col, value=df[col].iloc[-1], delta=delta_value)
     
     # Create real-time line chart
     fig_realtime = create_line_chart(df.tail(2000), 'Real-Time Sensor Readings')
