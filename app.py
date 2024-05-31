@@ -65,10 +65,7 @@ def calculate_differences(prev_data, new_data):
     return differences
 
 # Placeholder for line chart
-line_chart_placeholder = st.empty()
-
-# Placeholder for metrics
-metrics_placeholder = st.empty()
+line_chart_placeholder, metrics_placeholder = st.beta_columns([3, 1])
 
 # Fetch initial data
 prev_data = fetch_data()
@@ -104,13 +101,5 @@ while True:
     """.format(differences['Light'].iloc[-1], differences['Water'].iloc[-1], differences['Moist'].iloc[-1], 
                differences['Temp'].iloc[-1], differences['Humid'].iloc[-1])
     metrics_placeholder.markdown(metrics_html, unsafe_allow_html=True)
-
-    # Update line chart
-    fig_realtime = px.line(new_data.tail(2000), x=new_data.index, y=['Light', 'Water', 'Moist', 'Temp', 'Humid'],
-                           labels={'value': 'Value', 'index': 'Time'},
-                           title='Real-Time Sensor Readings',
-                           color_discrete_map={'Light': 'blue', 'Water': 'green', 'Moist': 'red', 'Temp': 'orange', 'Humid': 'purple'},
-                           line_dash_sequence=['solid']*5)  # Ensure solid lines for all sensors
-    line_chart_placeholder.plotly_chart(fig_realtime, use_container_width=True)
 
     prev_data = new_data
