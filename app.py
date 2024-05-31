@@ -9,12 +9,6 @@ st.title('Herbie Sensor Readings')
 st.subheader('Welcome to the sensor data dashboard')
 st.write('Here you can see the latest sensor readings from the Herbie project.')
 
-# Placeholder for line chart
-line_chart_placeholder = st.empty()
-
-# Placeholder for metrics
-metrics_placeholder = st.empty()
-
 # Path to JSON key file
 SERVICE_ACCOUNT_FILE = 'herbie_key.json'
 
@@ -72,6 +66,10 @@ def calculate_differences(prev_data, new_data):
 
 # Fetch initial data
 prev_data = fetch_data()
+
+# Create placeholders for line chart and metrics
+line_chart_placeholder = st.empty()
+metrics_placeholder = st.empty()
 
 # Create real-time line chart
 fig_realtime = px.line(prev_data.tail(2000), x=prev_data.index, y=['Light', 'Water', 'Moist', 'Temp', 'Humid'],
