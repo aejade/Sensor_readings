@@ -72,39 +72,29 @@ def create_line_chart(df, title):
                   line_dash_sequence=['solid']*5)  # Ensure solid lines for all sensors
     return fig
 
-# Placeholder for metrics
+# Create placeholders for metrics and line charts
 metrics_placeholder = st.empty()
+line_chart_placeholder = st.empty()
 
-# Fetch initial data
-df = fetch_data()
-
-# Display initial metrics
-if not df.empty:
-    latest_data = df.iloc[-1]
-    metrics_text = "Latest Sensor Readings:\n"
-    required_columns = ["Light", "Water", "Soil Moisture", "Temperature", "Humidity"]
-    for col in required_columns:
-        metrics_text += f"{col}: {latest_data[col]}\n"
-    metrics_placeholder.text(metrics_text)
-
-# Continuous loop to update metrics and line charts
+# Continuous loop to update line chart
 while True:
     # Fetch real-time data
     df = fetch_data()
 
-    # Update metrics
+    # Update line chart
+    fig = create_line_chart(df.tail(2000), 'Real-Time Sensor Readings')
+    line_chart_placeholder.plotly_chart(fig, use_container_width=True)
+
+    # Display metrics for the latest values
     if not df.empty:
         latest_data = df.iloc[-1]
-        metrics_text = "Latest Sensor Readings:\n"
-        required_columns = ["Light", "Water", "Soil Moisture", "Temperature", "Humidity"]
-        for col in required_columns:
-            metrics_text += f"{col}: {latest_data[col]}\n"
-        metrics_placeholder.text(metrics_text)
+        previous_data = df.iloc[-2] if len(df) > 1 else None
+        with metrics_placeholder.container():
+            st.metric(label="Light", value=latest_data["Light"], delta=latest_data["Light"] - previous_data["Light"] if previous_data is not None else None)
+            st.metric(label="Water", value=latest_data["Water"], delta=latest_data["Water"] - previous_data["Water"] if previous_data is not None else None)
+            st.metric(label="Soil Moisture", value=latest_data["Soil Moisture"], delta=latest_data["Soil Moisture"] - previous_data["Soil Moisture"] if previous_data is not None else None)
+            st.metric(label="Temperature", value=latest_data["Temperature"], delta=latest_data["Temperature"] - previous_data["Temperature"] if previous_data is not None else None)
+            st.metric(label="Humidity", value=latest_data["Humidity"], delta=latest_data["Humidity"] - previous_data["Humidity"] if previous_data is not None else None)
 
-    # Update line chart
-    if not df.empty:
-        fig_realtime = create_line_chart(df.tail(2000), 'Real-Time Sensor Readings')
-        st.plotly_chart(fig_realtime, use_container_width=True)
-
-    # Pause briefly before fetching new data and updating the charts
+    # Pause briefly before fetching new data and updating the chart
     time.sleep(5)  # Adjust the pause duration as needed
