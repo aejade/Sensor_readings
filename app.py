@@ -24,7 +24,7 @@ def fetch_data():
     # Convert the records to a pandas DataFrame
     df = pd.DataFrame(data)
 
-    df.rename(columns={'TimeString': 'Time'}, inplace=True)
+    df.rename(columns={'TimeString': 'Time', 'Temp': 'Temperature', 'Moist': 'Soil Moisture', 'Humid': 'Humidity'}, inplace=True)
 
     # Ensure 'TimeString' is datetime and set as index
     df['Time'] = pd.to_datetime(df['Time'])
@@ -49,10 +49,7 @@ def fetch_data():
 
 # Function to create line chart
 def create_line_chart(df, title):
-    
-    df.rename(columns={'Temp': 'Temperature', 'Moist': 'Soil Moisture', 'Humid': 'Humidity'}, inplace=True)
-    
-    fig = px.line(df, x=df.index, y=['Light', 'Water', 'Soil Moisture', 'Temperature', 'Humidity'],
+    fig = px.line(df, x=df.index, y=df.columns,
                   labels={'value': 'Value', 'index': 'Time'},
                   title=title,
                   color_discrete_map={'Light': 'blue', 'Water': 'green', 'Soil Moisture': 'red', 'Temperature': 'orange', 'Humidity': 'purple'},
@@ -93,9 +90,9 @@ while True:
     # Calculate differences between previous and current data
     differences = df.tail(1) - prev_data.tail(1)
     
-    # Update metrics values
+    # Update metrics values and deltas
     for i, col in enumerate(differences.columns):
-        metric_columns[i].metric(col, value=differences[col].iloc[0])
+        metric_columns[i].metric(col, value=df[col].iloc[-1], delta=differences[col].iloc[-1])
     
     # Create real-time line chart
     fig_realtime = create_line_chart(df.tail(2000), 'Real-Time Sensor Readings')
