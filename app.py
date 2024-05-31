@@ -3,8 +3,16 @@ import gspread
 from google.oauth2.service_account import Credentials
 import pandas as pd
 import plotly.express as px
+import time
+from PIL import Image
+import io
+import webview
+import time
 
-# Add a title and description
+# Add an image to the top of Streamlit app
+st.image('mqdc-idyllias-logo.png', use_column_width=True)
+
+# Add a title to Streamlit app
 st.title('Herbie Sensor Readings')
 st.subheader('Welcome to the sensor data dashboard')
 st.write('Here you can see the latest sensor readings from the Herbie project.')
@@ -29,7 +37,6 @@ spreadsheet = client.open("HerbieData")
 sheet = spreadsheet.worksheet("Forestias-0001")
 
 # Function to fetch data from Google Sheet and preprocess it
-@st.cache
 def fetch_data():
     # Fetch all records from the sheet
     data = sheet.get_all_records()
@@ -59,46 +66,50 @@ def fetch_data():
 
     return df
 
-# Function to calculate differences between the last and new data
-def calculate_differences(prev_data, new_data):
-    differences = new_data - prev_data
-    return differences
 
-# Placeholder for line chart
-line_chart_placeholder = st.empty()
+# Function to create line chart
+def create_line_chart(df, title):
+    
+    df.rename(columns={'Temp': 'Temperature', 'Moist': 'Soil Moisture', 'Humid': 'Humidity'}, inplace=True)
+    
+    fig = px.line(df, x=df.index, y=['Light', 'Water', 'Soil Moisture', 'Temperature', 'Humidity'],
+                  labels={'value': 'Value', 'index': 'Time'},
+                  title=title,
+                  color_discrete_map={'Light': 'blue', 'Water': 'green', 'Soil Moisture': 'red', 'Temperature': 'orange', 'Humidity': 'purple'},
+                  line_dash_sequence=['solid']*5)  # Ensure solid lines for all sensors
+    return fig
 
-# Placeholder for metrics
-metrics_placeholder = st.empty()
+# Create placeholders for line charts
+realtime_placeholder = st.empty()
+hourly_placeholder = st.empty()
 
-# Fetch initial data
-prev_data = fetch_data()
-
-# Create real-time line chart
-fig_realtime = px.line(prev_data.tail(2000), x=prev_data.index, y=['Light', 'Water', 'Moist', 'Temp', 'Humid'],
-                       labels={'value': 'Value', 'index': 'Time'},
-                       title='Real-Time Sensor Readings',
-                       color_discrete_map={'Light': 'blue', 'Water': 'green', 'Moist': 'red', 'Temp': 'orange', 'Humid': 'purple'},
-                       line_dash_sequence=['solid']*5)  # Ensure solid lines for all sensors
-
-# Display line chart
-line_chart_placeholder.plotly_chart(fig_realtime, use_container_width=True)
-
-# Update metrics and line chart
+# Continuous loop to update line charts
 while True:
     # Fetch real-time data
-    new_data = fetch_data()
+    df = fetch_data()
 
-    # Calculate differences
-    differences = calculate_differences(prev_data, new_data)
+    
+    # Create real-time line chart
+    fig_realtime = create_line_chart(df.tail(2000), 'Real-Time Sensor Readings')
+    realtime_placeholder.plotly_chart(fig_realtime, use_container_width=True)
 
-    # Display metrics
-    with st.beta_container():
-        st.header("Metrics:")
-        col1, col2, col3, col4, col5 = st.columns(5)
-        col1.metric("Light Change", differences['Light'].iloc[-1])
-        col2.metric("Water Change", differences['Water'].iloc[-1])
-        col3.metric("Soil Moisture Change", differences['Moist'].iloc[-1])
-        col4.metric("Temperature Change", differences['Temp'].iloc[-1])
-        col5.metric("Humidity Change", differences['Humid'].iloc[-1])
+    # Resample data to hourly intervals and calculate the mean value
+    df_hourly_avg = df.resample('H').mean()
 
-    prev_data = new_data
+    # Create hourly line chart
+    fig_hourly = create_line_chart(df_hourly_avg, 'Average Hourly Sensor Readings')
+    hourly_placeholder.plotly_chart(fig_hourly, use_container_width=True)
+
+    # Pause briefly before fetching new data and updating the charts
+    time.sleep(5)  # Adjust the pause duration as needed
+
+
+def reload(window):
+    while True:
+        time.sleep(5)
+        window.load_url('idyllias-demo.streamlit.app/')
+        
+if __name__ == '__main__':
+    window = webview.create_window('Herbie', 'idyllias-demo.streamlit.app/')
+
+    webview.start(reload, window, http_server=True)
