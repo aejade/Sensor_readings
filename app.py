@@ -75,12 +75,6 @@ def create_line_chart(df, title):
 # Fetch initial data
 df = fetch_data()
 
-# Placeholder for metrics
-metrics_placeholder = st.empty()
-
-# Placeholder for line chart
-line_chart_placeholder = st.empty()
-
 # Continuous loop to update metrics and line charts
 while True:
     # Fetch real-time data
@@ -94,12 +88,12 @@ while True:
         required_columns = ["Light", "Water", "Soil Moisture", "Temperature", "Humidity"]
         for col in required_columns:
             metrics_text += f"{col}: {latest_data[col]} (Δ{latest_data[col] - previous_data[col]})\n"
-        metrics_placeholder.text(metrics_text)
+        st.text(metrics_text)
 
     # Update line chart
     if not df.empty:
         fig_realtime = create_line_chart(df.tail(2000), 'Real-Time Sensor Readings')
-        line_chart_placeholder.plotly_chart(fig_realtime, use_container_width=True)
+        st.plotly_chart(fig_realtime, use_container_width=True)
 
     # Pause briefly before fetching new data and updating the charts
     time.sleep(5)  # Adjust the pause duration as needed
