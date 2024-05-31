@@ -72,8 +72,20 @@ def create_line_chart(df, title):
                   line_dash_sequence=['solid']*5)  # Ensure solid lines for all sensors
     return fig
 
+# Placeholder for metrics
+metrics_placeholder = st.empty()
+
 # Fetch initial data
 df = fetch_data()
+
+# Display initial metrics
+if not df.empty:
+    latest_data = df.iloc[-1]
+    metrics_text = "Latest Sensor Readings:\n"
+    required_columns = ["Light", "Water", "Soil Moisture", "Temperature", "Humidity"]
+    for col in required_columns:
+        metrics_text += f"{col}: {latest_data[col]}\n"
+    metrics_placeholder.text(metrics_text)
 
 # Continuous loop to update metrics and line charts
 while True:
@@ -83,12 +95,11 @@ while True:
     # Update metrics
     if not df.empty:
         latest_data = df.iloc[-1]
-        previous_data = df.iloc[-2]
         metrics_text = "Latest Sensor Readings:\n"
         required_columns = ["Light", "Water", "Soil Moisture", "Temperature", "Humidity"]
         for col in required_columns:
-            metrics_text += f"{col}: {latest_data[col]} (Δ{latest_data[col] - previous_data[col]})\n"
-        st.text(metrics_text)
+            metrics_text += f"{col}: {latest_data[col]}\n"
+        metrics_placeholder.text(metrics_text)
 
     # Update line chart
     if not df.empty:
