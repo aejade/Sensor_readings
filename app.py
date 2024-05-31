@@ -11,7 +11,11 @@ st.subheader('Welcome to the sensor data dashboard')
 st.write('Here you can see the latest sensor readings from the Herbie project.')
 
 # Placeholder for metrics
-metrics_placeholder = st.empty()
+light_metric = st.metric(label="Light Change", value=0)
+water_metric = st.metric(label="Water Change", value=0)
+soil_moisture_metric = st.metric(label="Soil Moisture Change", value=0)
+temperature_metric = st.metric(label="Temperature Change", value=0)
+humidity_metric = st.metric(label="Humidity Change", value=0)
 
 # Path to JSON key file
 SERVICE_ACCOUNT_FILE = 'herbie_key.json'
@@ -62,60 +66,31 @@ def fetch_data():
 
     return df
 
-
-# Function to create line chart
-def create_line_chart(df, title):
-    
-    df.rename(columns={'Temp': 'Temperature', 'Moist': 'Soil Moisture', 'Humid': 'Humidity'}, inplace=True)
-    
-    fig = px.line(df, x=df.index, y=['Light', 'Water', 'Soil Moisture', 'Temperature', 'Humidity'],
-                  labels={'value': 'Value', 'index': 'Time'},
-                  title=title,
-                  color_discrete_map={'Light': 'blue', 'Water': 'green', 'Soil Moisture': 'red', 'Temperature': 'orange', 'Humidity': 'purple'},
-                  line_dash_sequence=['solid']*5)  # Ensure solid lines for all sensors
-    return fig
+# Function to calculate differences between the last and new data
+def calculate_differences(prev_data, new_data):
+    differences = new_data - prev_data
+    return differences
 
 # Fetch initial data
-df = fetch_data()
-
-# Calculate initial differences for each sensor
-differences = df.diff().tail(1).dropna()
-light_change = differences['Light'].values[0]
-water_change = differences['Water'].values[0]
-soil_moisture_change = differences['Moist'].values[0]
-temperature_change = differences['Temp'].values[0]
-humidity_change = differences['Humid'].values[0]
-
-# Display initial metrics showing changes for each sensor
-metrics_placeholder.metric("Light Change", value=light_change)
-metrics_placeholder.metric("Water Change", value=water_change)
-metrics_placeholder.metric("Soil Moisture Change", value=soil_moisture_change)
-metrics_placeholder.metric("Temperature Change", value=temperature_change)
-metrics_placeholder.metric("Humidity Change", value=humidity_change)
+prev_data = fetch_data()
 
 # Continuous loop to update line charts
 while True:
     # Fetch real-time data
-    df = fetch_data()
+    new_data = fetch_data()
 
-    # Calculate differences for each sensor
-    differences = df.diff().tail(1).dropna()
-    light_change = differences['Light'].values[0]
-    water_change = differences['Water'].values[0]
-    soil_moisture_change = differences['Moist'].values[0]
-    temperature_change = differences['Temp'].values[0]
-    humidity_change = differences['Humid'].values[0]
+    # Calculate differences
+    differences = calculate_differences(prev_data, new_data)
 
-    # Update metrics showing changes for each sensor
-    metrics_placeholder.metric("Light Change", value=light_change)
-    metrics_placeholder.metric("Water Change", value=water_change)
-    metrics_placeholder.metric("Soil Moisture Change", value=soil_moisture_change)
-    metrics_placeholder.metric("Temperature Change", value=temperature_change)
-    metrics_placeholder.metric("Humidity Change", value=humidity_change)
+    # Update metrics showing differences
+    light_metric.value = differences['Light'].iloc[-1]
+    water_metric.value = differences['Water'].iloc[-1]
+    soil_moisture_metric.value = differences['Moist'].iloc[-1]
+    temperature_metric.value = differences['Temp'].iloc[-1]
+    humidity_metric.value = differences['Humid'].iloc[-1]
 
-    # Create real-time line chart
-    fig_realtime = create_line_chart(df.tail(2000), 'Real-Time Sensor Readings')
-    st.plotly_chart(fig_realtime, use_container_width=True)
+    # Update previous data
+    prev_data = new_data
 
-    # Pause briefly before fetching new data and updating the charts
+    # Pause briefly before fetching new data and updating the metrics
     time.sleep(5)  # Adjust the pause duration as needed
