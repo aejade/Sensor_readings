@@ -1,3 +1,4 @@
+
 import streamlit as st
 import gspread
 from google.oauth2.service_account import Credentials
@@ -62,6 +63,8 @@ def fetch_data():
 
     # Convert all columns to numeric
     df = df.apply(pd.to_numeric, errors='coerce')
+
+    print("DataFrame columns after renaming and processing:", df.columns)
 
     return df
 
