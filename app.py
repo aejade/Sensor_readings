@@ -98,11 +98,12 @@ while True:
     temperature_change = differences['Temp'].iloc[-1]
     humidity_change = differences['Humid'].iloc[-1]
 
-    metrics_placeholder.metric("Light Change", light_change)
-    metrics_placeholder.metric("Water Change", water_change)
-    metrics_placeholder.metric("Soil Moisture Change", soil_moisture_change)
-    metrics_placeholder.metric("Temperature Change", temperature_change)
-    metrics_placeholder.metric("Humidity Change", humidity_change)
+    # Update metrics
+    metrics_placeholder.write(f"Light Change: {light_change}")
+    metrics_placeholder.write(f"Water Change: {water_change}")
+    metrics_placeholder.write(f"Soil Moisture Change: {soil_moisture_change}")
+    metrics_placeholder.write(f"Temperature Change: {temperature_change}")
+    metrics_placeholder.write(f"Humidity Change: {humidity_change}")
 
     # Update line chart
     fig_realtime = px.line(new_data.tail(2000), x=new_data.index, y=['Light', 'Water', 'Moist', 'Temp', 'Humid'],
