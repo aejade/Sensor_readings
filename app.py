@@ -83,29 +83,9 @@ fig_realtime = px.line(prev_data.tail(2000), x=prev_data.index, y=['Light', 'Wat
 # Display line chart
 line_chart_placeholder.plotly_chart(fig_realtime, use_container_width=True)
 
-# Create metrics placeholders
-metrics_labels = ["Light Change", "Water Change", "Soil Moisture Change", "Temperature Change", "Humidity Change"]
-metrics_values = [0] * len(metrics_labels)
-
-# Update metrics and line chart
-while True:
-    # Fetch real-time data
-    new_data = fetch_data()
-
-    # Calculate differences
-    differences = calculate_differences(prev_data, new_data)
-
-    # Update metrics showing differences
-    for i, label in enumerate(metrics_labels):
-        metrics_values[i] = differences.iloc[-1][label.split()[0]]  # Extract sensor name from label
-        st.metric(label=label, value=metrics_values[i])
-
-    # Update line chart
-    fig_realtime = px.line(new_data.tail(2000), x=new_data.index, y=['Light', 'Water', 'Moist', 'Temp', 'Humid'],
-                           labels={'value': 'Value', 'index': 'Time'},
-                           title='Real-Time Sensor Readings',
-                           color_discrete_map={'Light': 'blue', 'Water': 'green', 'Moist': 'red', 'Temp': 'orange', 'Humid': 'purple'},
-                           line_dash_sequence=['solid']*5)  # Ensure solid lines for all sensors
-    line_chart_placeholder.plotly_chart(fig_realtime, use_container_width=True)
-
-    prev_data = new_data
+# Update metrics showing differences
+metrics_placeholder.metric("Light Change", value=0)
+metrics_placeholder.metric("Water Change", value=0)
+metrics_placeholder.metric("Soil Moisture Change", value=0)
+metrics_placeholder.metric("Temperature Change", value=0)
+metrics_placeholder.metric("Humidity Change", value=0)
